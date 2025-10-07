@@ -89,9 +89,9 @@ if __name__ == "__main__":
     print("doesn't find the minimal series for k < 8")
     k = int(input("target length of a series: "))
     depthNonPrime = int(input("depth of the search algorhytm: "))
-
+    
     # Number of processes
-    numProcesses = os.cpu_count()
+    numProcesses = int(input("number of processes (defaults to number of CPU cores): ") or os.cpu_count())
     processes = []
 
     # Start processes on distinct ranges of odd numbers
