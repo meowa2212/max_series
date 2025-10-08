@@ -21,84 +21,93 @@ def decompose(n): #return d and s where n-1 = 2^s * d and d is odd
         n //= 2
     return n, s
 
-def miller_rabin_improved(n, base): #miller_rabin primality test with some check at the beggining
-    if n == 2:
-        return True
-    if n % 2  or n < 2 == 0:
-        return False
-    
-    d = n-1
-    if pow(base, d, n) != 1:
-        return False
-    while d % 2 == 0:
-        d //= 2
-        if pow(base, d, n) != 1:
-            if pow(base, d, n) == n-1:
-                return True
-            else: 
-                return False
-    return True
 
-def miller_rabin(n, base): #miller_rabin for n bigger than 2
-    d = n-1
-    if pow(base, d, n) != 1:
-        return False
-    while d % 2 == 0:
-        d //= 2
-        if pow(base, d, n) != 1:
-            if pow(base, d, n) == n-1:
-                return True
-            else: 
-                return False
-    return True
-    
+SMALL_PRIMES = [
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
+    73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
+    157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233,
+    239, 241
+]
+
+
+def miller_rabin(n, a): #miller_rabin primality test with some check at the beggining
+    d, s = decompose(n)
+    x = pow(a, d, n)
+    if x == 1 or x == n - 1:
+        return True
+    for _ in range(s - 1):
+        x = pow(x, 2, n)
+        if x == n - 1:
+            return True
+    return False
 
 # -------------- Final Functions ------------------
-def isPrime_mini(n): #for n less than 9080191
-    for base in [31, 73]:
-        if not miller_rabin_improved(n, base):
-            return False
-    return True
 
-
-def isPrime_mid(n): #for n less than 4759123141
-    for base in [2,7,61]:
-        if not miller_rabin_improved(n, base):
-            return False
-    return True
-
-    
-def isPrime_max(n): #for n less than 341550071728321
-    for base in [2,3,5,7,11,13,17]:
-        if not miller_rabin_improved(n, base):
-            return False
-    return True
-
-
-def isPrime_any_prob(n, k=10): #for any n but probabilistic k bases tried return with probability
-    if n <= 4:
-        if n in [2, 3]:
-            return True, 1
-        else:
-            return False, 1
-        
-    for i in range(k):
-        base = randint(2, n-2)
-        if not miller_rabin_improved(n, base):
-            return False, 1
-    return True, 1 - 0.25**k
-
-
-
-def isPrime_any(n, k=10): #for any n but probabilistic k bases tried
+def isPrime_mini(n): #for n less than 4759123141
     if n <= 4:
         if n in [2, 3]:
             return True
         else:
             return False
+    if n % 2 == 0:
+        return False
     
-    for i in range(k):
-        base = randint(2, n-2)
+    for prime in SMALL_PRIMES:
+        if n == prime:
+            return True
+        if n % prime == 0:
+            return False
+
+    for base in [2,7,61]:
+        if not miller_rabin(n, base):
+            return False
+    return True
+
+    
+def isPrime_max(n): #for n less than 341550071728321
+    if n <= 4:
+        if n in [2, 3]:
+            return True
+        else:
+            return False
+    if n % 2 == 0:
+        return False
+    
+    for prime in SMALL_PRIMES:
+        if n == prime:
+            return True
+        if n % prime == 0:
+            return False
+        
+    for base in [2,3,5,7,11,13,17]:
+        if not miller_rabin(n, base):
+            return False
+    return True
+
+
+def isPrime_any(n, k=7): #for any n but probabilistic (0.25**k chance to be wrong) k bases tried
+    if n <= 4:
+        if n in [2, 3]:
+            return True
+        else:
+            return False
+    if n % 2 == 0:
+        return False
+    
+    for prime in SMALL_PRIMES:
+        if n == prime:
+            return True
+        if n % prime == 0:
+            return False
+    
+    if n < 4759123141:
+        bases = [2,7,61]
+    elif n < 341550071728321:
+        bases = [2,3,5,7,11,13,17]
+    else:
+        bases = [randint(2, n-2) for _ in range(k)]
+    
+    for base in bases:
         if not miller_rabin(n, base):
             return False
     return True
@@ -107,8 +116,8 @@ def isPrime_any(n, k=10): #for any n but probabilistic k bases tried
 if __name__ == "__main__":
     low = int(input("lower border: "))
     high = int(input("high border: "))
+    tries = int(input("number of tries for a probabilistic test: "))
     for i in range(low, high+1):
-        result = isPrime_any_prob(i)
-        if result[0]:
-            print(f"{i}: {result[1]}")
-    
+        if isPrime_any(i, tries):
+            print(f"{i}: {(1-0.25**tries)*100:.6f}%")
+        
