@@ -44,12 +44,7 @@ def miller_rabin(n, a): #miller_rabin primality test with some check at the begg
 # -------------- Final Functions ------------------
 
 def isPrime_mini(n): #for n less than 4759123141
-    if n <= 4:
-        if n in [2, 3]:
-            return True
-        else:
-            return False
-    if n % 2 == 0:
+    if n < 2:
         return False
     
     for prime in SMALL_PRIMES:
@@ -65,14 +60,9 @@ def isPrime_mini(n): #for n less than 4759123141
 
     
 def isPrime_max(n): #for n less than 341550071728321
-    if n <= 4:
-        if n in [2, 3]:
-            return True
-        else:
-            return False
-    if n % 2 == 0:
+    if n < 2:
         return False
-    
+        
     for prime in SMALL_PRIMES:
         if n == prime:
             return True
@@ -86,12 +76,7 @@ def isPrime_max(n): #for n less than 341550071728321
 
 
 def isPrime_any(n, k=7): #for any n but probabilistic (0.25**k chance to be wrong) k bases tried
-    if n <= 4:
-        if n in [2, 3]:
-            return True
-        else:
-            return False
-    if n % 2 == 0:
+    if n < 2:
         return False
     
     for prime in SMALL_PRIMES:
@@ -120,4 +105,4 @@ if __name__ == "__main__":
     for i in range(low, high+1):
         if isPrime_any(i, tries):
             print(f"{i}: {(1-0.25**tries)*100:.6f}%")
-        
+

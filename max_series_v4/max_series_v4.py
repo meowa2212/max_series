@@ -3,29 +3,16 @@ Wojciech Gorzynski
 10-09-2025 v5
 Searches for longest algebraic series of primes.
 Changes:
-    -choice to use traditional algorithm instead Miller-Rabin primality test
-    -aproximates the depth of the search algorhytm
+    -aproximates the depth of the search algorhytm WIP
     -uses sieve of eratosthenes to generate the primorial
+    -cleaned up the code
 '''
 
 import multiprocessing
 import os
 import math
 
-# optional function to check if a number is prime
-def isPrime_any(n):
-    if n < 2:
-        return False
-    if n == 2:
-        return True
-    if n % 2 == 0:
-        return False
-    i = 3
-    while i * i <= n:
-        if n % i == 0:
-            return False
-        i += 2
-    return True
+from Miller_Rabin_test import isPrime_any
 
 def lesserPrimes(n): # returns a list of all the lesser primes
     if n < 2:
@@ -84,7 +71,7 @@ def seriesFinder(a, step, k):
                 if isPrime_any(b):
                     length = checkSeries(a,b)
                     if length >= k:
-                        print(f"{generateSeries(a, difference, k)} l:{length}, d:{depthNonPrime}")
+                        print(f"{generateSeries(a, difference, k)} len:{length}, dth:{depthNonPrime}, dif:{difference}")
                 multiple += 1
         a += step
 
@@ -92,40 +79,15 @@ def main():
     print("doesn't find the minimal series for k < 8")
     k = int(input("target length of a series: "))
     
-    choice = input("use Miller-Rabin primality test? (Y/n): ")
-    if choice == '' or choice.lower() == 'y':
-        from Miller_Rabin_test import isPrime_any
-
-    
     # Number of processes
     numProcesses = int(input(f"number of processes (defaults to: {os.cpu_count()}): ") or os.cpu_count())
     processes = []
-
 
     # Start processes on distinct ranges of odd numbers
     for i in range(numProcesses):
         process = multiprocessing.Process(target=seriesFinder, args=(3 + i * 2, numProcesses * 2, k))
         processes.append(process)
         process.start()
-
-    # Print the first prime manually (since it's 2 and all processes start with odd numbers)
-    a = 2
-    generateLength = k 
-    multiple = 1
-    depthNonPrime = math.ceil(max(20, 10*math.log(max(1, k*a/50000))))
-    primorialVal = primorial(k)
-    while depthNonPrime >= multiple: 
-        difference = primorialVal*multiple
-        b = a+difference
-        if isPrime_any(b):
-            length = checkSeries(a,b)
-            if length >= generateLength:
-                print(f"{generateSeries(a, difference, generateLength)} l:{length}, d:{depthNonPrime}")
-        multiple += 1
-
-    # Wait for all processes to finish
-    for process in processes:
-        process.join() 
 
 
 if __name__ == "__main__":
